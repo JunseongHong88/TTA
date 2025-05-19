@@ -1,3 +1,4 @@
+// client/src/App.js
 import React, { useState } from 'react';
 
 function App() {
@@ -16,9 +17,15 @@ function App() {
         body: JSON.stringify({ text: input }),
       });
       const json = await res.json();
-      console.log('분석 결과:', json);
-      const data = json.analysis || [];
-      setAnalysis(Array.isArray(data) ? data : null);
+      console.log('분석 결과(raw):', json);
+
+      // API가 [ ... ] 을 바로 리턴해도, { analysis: [ ... ] } 를 리턴해도 모두 처리
+      const arr = Array.isArray(json)
+        ? json
+        : Array.isArray(json.analysis)
+          ? json.analysis
+          : [];
+      setAnalysis(arr.length > 0 ? arr : null);
     } catch (err) {
       console.error(err);
       alert('분석 중 오류 발생');
@@ -36,13 +43,18 @@ function App() {
         body: JSON.stringify({ analysis }),
       });
       const json = await res.json();
+      console.log('인사이트 결과(raw):', json);
+
       if (json.error) {
-        console.error('인사이트 오류:', json);
-        alert(`인사이트 실패: ${json.error}\n${json.rawContent || ''}`);
+        alert(`인사이트 실패: ${json.error}`);
         setInsights(null);
       } else {
-        const data = json.insights || [];
-        setInsights(Array.isArray(data) ? data : null);
+        const arr = Array.isArray(json)
+          ? json
+          : Array.isArray(json.insights)
+            ? json.insights
+            : [];
+        setInsights(arr.length > 0 ? arr : null);
       }
     } catch (err) {
       console.error(err);
@@ -156,7 +168,7 @@ function App() {
       boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
       background: '#fff',
       fontFamily: 'system-ui',
-      minHeight: 480        /* 원래 높이를 유지해서 결과가 아래로 붙도록 합니다. */
+      minHeight: 480
     }}>
       <h2 style={{ textAlign: 'center', fontSize: 28, marginBottom: 16 }}>
         📝 교육 발화 분석 웹서비스
