@@ -156,12 +156,13 @@ function App() {
       boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
       background: '#fff',
       fontFamily: 'system-ui',
-      minHeight: 480
+      overflowY: 'auto'          // ⬅️ minHeight 제거하고 overflowY로 변경
     }}>
       <h2 style={{ textAlign: 'center', fontSize: 28, marginBottom: 16 }}>
         📝 교육 발화 분석 웹서비스
       </h2>
       <textarea
+        id="dialogue-input"
         rows={8}
         style={{
           width: '100%',
