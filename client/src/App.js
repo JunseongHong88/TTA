@@ -156,7 +156,7 @@ function App() {
       boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
       background: '#fff',
       fontFamily: 'system-ui',
-      overflowY: 'auto'          // ⬅️ minHeight 제거하고 overflowY로 변경
+      minHeight: 480        /* 원래 높이를 유지해서 결과가 아래로 붙도록 합니다. */
     }}>
       <h2 style={{ textAlign: 'center', fontSize: 28, marginBottom: 16 }}>
         📝 교육 발화 분석 웹서비스
