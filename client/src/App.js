@@ -10,7 +10,7 @@ function App() {
     setLoading(true);
     setInsights(null);
     try {
-      const res = await fetch('http://localhost:5001/analyze', {
+      const res = await fetch('https://tta-backend-3nj6.onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: input }),
@@ -29,7 +29,7 @@ function App() {
   const getInsight = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5001/insight', {
+      const res = await fetch('https://tta-backend-3nj6.onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ analysis }),
