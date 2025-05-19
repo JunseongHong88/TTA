@@ -16,16 +16,9 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: input }),
       });
-      const json = await res.json();
-      console.log('분석 결과(raw):', json);
-
-      // API가 [ ... ] 을 바로 리턴해도, { analysis: [ ... ] } 를 리턴해도 모두 처리
-      const arr = Array.isArray(json)
-        ? json
-        : Array.isArray(json.analysis)
-          ? json.analysis
-          : [];
-      setAnalysis(arr.length > 0 ? arr : null);
+      const data = await res.json();
+      console.log('분석 결과:', data);
+      setAnalysis(Array.isArray(data) ? data : null);
     } catch (err) {
       console.error(err);
       alert('분석 중 오류 발생');
@@ -37,25 +30,14 @@ function App() {
   const getInsight = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://tta-backend-3nj6.onrender.com/insights', {
+      const res = await fetch('https://tta-backend-3nj6.onrender.com/insight', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ analysis }),
       });
-      const json = await res.json();
-      console.log('인사이트 결과(raw):', json);
-
-      if (json.error) {
-        alert(`인사이트 실패: ${json.error}`);
-        setInsights(null);
-      } else {
-        const arr = Array.isArray(json)
-          ? json
-          : Array.isArray(json.insights)
-            ? json.insights
-            : [];
-        setInsights(arr.length > 0 ? arr : null);
-      }
+      const data = await res.json();
+      console.log('인사이트 결과:', data);
+      setInsights(Array.isArray(data) ? data : null);
     } catch (err) {
       console.error(err);
       alert('인사이트 생성 중 오류 발생');
@@ -72,16 +54,13 @@ function App() {
           <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 15 }}>
             <thead>
               <tr>
-                {keys.map(k => (
-                  <th
-                    key={k}
-                    style={{
-                      borderBottom: '1px solid #ccc',
-                      textAlign: 'left',
-                      padding: '4px 6px',
-                      background: '#f2f2f2'
-                    }}
-                  >
+                {keys.map((k) => (
+                  <th key={k} style={{
+                    borderBottom: '1px solid #ccc',
+                    textAlign: 'left',
+                    padding: '4px 6px',
+                    background: '#f2f2f2'
+                  }}>
                     {k}
                   </th>
                 ))}
@@ -90,8 +69,11 @@ function App() {
             <tbody>
               {content.map((item, i) => (
                 <tr key={i}>
-                  {keys.map(k => (
-                    <td key={k} style={{ padding: '4px 6px', borderBottom: '1px solid #eee' }}>
+                  {keys.map((k) => (
+                    <td key={k} style={{
+                      padding: '4px 6px',
+                      borderBottom: '1px solid #eee'
+                    }}>
                       {String(item[k])}
                     </td>
                   ))}
@@ -104,7 +86,9 @@ function App() {
       return (
         <ul style={{ paddingLeft: 20, margin: 0 }}>
           {content.map((item, idx) =>
-            <li key={idx}>{typeof item === 'object' ? JSON.stringify(item) : item}</li>
+            <li key={idx}>
+              {typeof item === 'object' ? JSON.stringify(item) : item}
+            </li>
           )}
         </ul>
       );
@@ -113,7 +97,9 @@ function App() {
       return (
         <ul style={{ paddingLeft: 20, margin: 0 }}>
           {Object.entries(content).map(([k, v]) =>
-            <li key={k}><b>{k}:</b> {typeof v === 'object' ? JSON.stringify(v) : String(v)}</li>
+            <li key={k}>
+              <b>{k}:</b> {typeof v === 'object' ? JSON.stringify(v) : String(v)}
+            </li>
           )}
         </ul>
       );
@@ -123,21 +109,23 @@ function App() {
 
   const renderAnalysis = (arr) => (
     <div style={{ marginTop: 16 }}>
-      {Array.isArray(arr) && arr.length > 0
-        ? arr.map((step, i) => (
-          <div
-            key={i}
-            style={{ marginBottom: 18, background: '#f8f9fa', borderRadius: 8, padding: 16 }}
-          >
-            <b style={{ fontSize: 17, color: '#1668c2' }}>
-              {step?.title ? step.title.replace(/^\d+\.\s?/, '') : `단계 ${i + 1}`}
-            </b>
-            <div style={{ marginTop: 8, fontSize: 15, color: '#222' }}>
-              {renderSectionContent(step?.content)}
-            </div>
+      {Array.isArray(arr) && arr.length > 0 ? arr.map((step, i) => (
+        <div key={i} style={{
+          marginBottom: 18,
+          background: '#f8f9fa',
+          borderRadius: 8,
+          padding: 16
+        }}>
+          <b style={{ fontSize: 17, color: '#1668c2' }}>
+            {step?.title?.replace(/^\d+\.\s?/, '') || `단계 ${i + 1}`}
+          </b>
+          <div style={{ marginTop: 8, fontSize: 15, color: '#222' }}>
+            {renderSectionContent(step?.content)}
           </div>
-        ))
-        : <div>분석 결과를 불러올 수 없습니다.</div>}
+        </div>
+      )) : (
+        <div>분석 결과를 불러올 수 없습니다.</div>
+      )}
     </div>
   );
 
@@ -145,36 +133,36 @@ function App() {
     <div style={{ marginTop: 20 }}>
       <h4 style={{ color: '#2e7d32' }}>💡 인사이트</h4>
       <ul style={{ paddingLeft: 20 }}>
-        {Array.isArray(arr) && arr.length > 0
-          ? arr.map((item, idx) => (
-            <li key={idx} style={{ marginBottom: 12, fontSize: 16 }}>
-              <b>{item?.title || item?.idea || `인사이트 ${idx + 1}`}</b>
-              <div style={{ marginTop: 4, color: '#222' }}>
-                {item?.content || item?.description}
-              </div>
-            </li>
-          ))
-          : <li>인사이트 결과가 없습니다.</li>}
+        {Array.isArray(arr) && arr.length > 0 ? arr.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: 12, fontSize: 16 }}>
+            <b>{item.title || item.idea || `인사이트 ${idx + 1}`}</b>
+            <div style={{ marginTop: 4, color: '#222' }}>
+              {item.content || item.description}
+            </div>
+          </li>
+        )) : (
+          <li>인사이트 결과가 없습니다.</li>
+        )}
       </ul>
     </div>
   );
 
   return (
     <div style={{
-      maxWidth: 680,
-      margin: '40px auto',
-      padding: 28,
+      maxWidth: 680, margin: '40px auto', padding: 28,
       borderRadius: 18,
       boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
       background: '#fff',
       fontFamily: 'system-ui',
       minHeight: 480
     }}>
-      <h2 style={{ textAlign: 'center', fontSize: 28, marginBottom: 16 }}>
-        📝 교육 발화 분석 웹서비스
-      </h2>
+      <h2 style={{
+        textAlign: 'center',
+        fontSize: 28,
+        marginBottom: 16
+      }}>📝 교육 발화 분석 웹서비스</h2>
+
       <textarea
-        id="dialogue-input"
         rows={8}
         style={{
           width: '100%',
@@ -188,6 +176,7 @@ function App() {
         value={input}
         onChange={e => setInput(e.target.value)}
       />
+
       <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
         <button
           onClick={analyze}
@@ -202,10 +191,10 @@ function App() {
             fontWeight: 'bold',
             fontSize: 16,
             cursor: 'pointer'
-          }}
-        >
+          }}>
           {loading ? '분석 중...' : '분석하기'}
         </button>
+
         <button
           onClick={getInsight}
           disabled={loading || !analysis}
@@ -219,8 +208,7 @@ function App() {
             fontWeight: 'bold',
             fontSize: 16,
             cursor: 'pointer'
-          }}
-        >
+          }}>
           {loading ? '처리 중...' : '인사이트 얻기'}
         </button>
       </div>
